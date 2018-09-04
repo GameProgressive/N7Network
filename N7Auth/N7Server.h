@@ -26,8 +26,8 @@ public:
 	~N7AuthServer();
 	
 protected:
-	void HandleHTTPRequest(mdk_client client, const char *action, const char *path, const char* content, const char **headers, size_t headers_len);
-
+	void HandleHTTPRequest(mdk_socket client, const char *action, const char *path, const char* content, const char **headers, size_t headers_len);
+	void HandleAcctCreate(mdk_socket client, const char* content);
 };
 
 #endif

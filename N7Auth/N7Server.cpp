@@ -15,31 +15,60 @@
     along with N7Network.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "N7Server.h"
-#include "GSContainer.h"
-#include "Base64.h"
+
+#include <string.h>
+
+#include <Base64.h>
+#include <Utility.h>
+
+#include <MDK/Utility.h>
+
+#define CHECK_ACTION(x) strcmp(action, x) == 0
 
 N7AuthServer::N7AuthServer() {}
 N7AuthServer::~N7AuthServer() {}
 
-void N7AuthServer::HandleHTTPRequest(mdk_client client, const char *action, const char *path, const char* content, const char **headers, size_t headers_len)
+void N7AuthServer::HandleHTTPRequest(mdk_socket client, const char *http_action, const char *path, const char* content, const char **headers, size_t headers_len)
 {
-	char* real_action = NULL, *pch = NULL;
-	char buffer[1024];
-	size_t pos1 = 0, pos2 = 0;
+	char action[23];
+	action[0] = 0;
+	size_t pos = 0;
 
-	//REQ: action=YWNjdGNyZWF0ZQ**&sdkver=MDA1MDAz&userid=ODU1Mjk3ODYxMjM3Mg**&passwd=OTE3&bssid=OTRmZTIyYWYzODAz&apinfo=MDA6MDAwMDAwMC0wMA**&gamecd=SVJBSQ**&makercd=MDE*&unitcd=MA**&macadr=NDBkMjhhMjZmZjg3&lang=MDQ*&birth=MDIxMw**&devtime=MTgwNzA4MTY0NDMw&devname=QwBoAHIAeQA*
-	//RES: challenge=Njg3VEYwRUc*&locator=Z2FtZXNweS5jb20*&retry=MA**&returncd=MDA*&token=dDIzamc4OWhmN2dxd2ZvMHdlNGY3OHEyZ3Q3Zg**&datetime=MjAxNDAyMjgyMTA0NTI*
-
-	pch = (char*)strstr(content, "action=");
-	pos1 = pch - content;
-	pos1 += 7;
-	pch = (char*)strstr(&content[pos1], "&");
-	pos2 = pch - &content[pos1];
-
-	strncpy(buffer, &content[pos1], pos2);
-
-	pos1 = B64DecodeLen(buffer);
+	if (strcmp(path, "/ac") != 0)
+	{
+		LOG_ERROR("N7Auth", "Unknown path: %s", path);
+		return;
+	}
 	
+	pos = get_n7_action(content, action, 22);
+	if (pos == 0)
+		return;
+	
+	if (CHECK_ACTION("acctcreate"))
+	{
+		HandleAcctCreate(client, &content[pos]);
+	}
+	else
+	{
+		LOG_ERROR("N7Auth", "Unknown action: %s", action);
+	}
+}
 
-	Write(client, action);
+void N7AuthServer::HandleAcctCreate(mdk_socket client, const char* content)
+{
+	char buffer[1024], user[GP_NICK_LEN];
+	int sdk_version = 0;
+	buffer[0] = user[0] = '\0';
+	
+	if (!get_n7_data(content, "sdkver", buffer, 1024))
+		return;
+	
+	sdk_version = atoi(buffer);
+	
+	if (!get_n7_data(content, "userid", user, GP_NICK_LEN))
+		return;
+		
+	// email is user@nds
+	
+	
 }

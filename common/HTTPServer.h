@@ -19,19 +19,22 @@
 
 #include "N7Common.h"
 
-class CHTTPServer : public Server
+#include <MDK/TemplateServer.h>
+
+class CHTTPServer : public CTemplateServer
 {
 public:
 	CHTTPServer();
 	~CHTTPServer();
 	
-	bool OnNewConnection(mdk_client client);
-	void OnRead(mdk_client client, const char *data, ssize_t size);
+	bool OnTCPNewConnection(mdk_socket client, int status);
+	void OnTCPRead(mdk_socket client, const char *data, ssize_t size);
+	void OnUDPRead(mdk_socket client, const struct sockaddr* addr, const char *data, ssize_t size);
 	
-	static void WriteHTTPResponse(mdk_client client, const char* content, const char* content_type, int code = 200, const char *message = "OK", const char** extraheaders = NULL, size_t extraheaders_size = 0);
+	static void WriteHTTPResponse(mdk_socket client, const char* content, const char* content_type, int code = 200, const char *message = "OK", const char** extraheaders = NULL, size_t extraheaders_size = 0);
 
 protected:
-	virtual void HandleHTTPRequest(mdk_client client, const char *action, const char *path, const char* content, const char **headers, size_t headers_size) = 0;
+	virtual void HandleHTTPRequest(mdk_socket client, const char *action, const char *path, const char* content, const char **headers, size_t headers_size) = 0;
 
 };
 

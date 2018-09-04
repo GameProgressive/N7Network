@@ -15,7 +15,10 @@
     along with N7Network.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <N7Common.h>
+
 #include "N7Server.h"
+
+#include <MDK/Utility.h>
 
 #define DEFAULT_PORT 30000
 

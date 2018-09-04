@@ -17,6 +17,9 @@
 #include "HTTPServer.h"
 
 #include <time.h>
+#include <string.h>
+
+#include <MDK/Utility.h>
 
 const char* _GetMon(int i);
 const char* _GetDay(int i);
@@ -27,9 +30,9 @@ CHTTPServer::CHTTPServer()
 CHTTPServer::~CHTTPServer()
 {}
 
-bool CHTTPServer::OnNewConnection(mdk_client) { return true; }
+bool CHTTPServer::OnTCPNewConnection(mdk_socket, int) { return true; }
 
-void CHTTPServer::OnRead(mdk_client client, const char *data, ssize_t size)
+void CHTTPServer::OnTCPRead(mdk_socket client, const char *data, ssize_t size)
 {
 	const char *action = NULL;
 	char path[1024];
@@ -53,10 +56,16 @@ void CHTTPServer::OnRead(mdk_client client, const char *data, ssize_t size)
 		return;
 	
 	if (pos > 1023)
+	{
 		// Truncated...
-		strncpy_s(path, sizeof(path), &data[xpos], 1023);
+		strncpy(path, &data[xpos], 1024);
+		path[1024] = '\0';
+	}
 	else
-		strncpy_s(path, sizeof(path), &data[xpos], pos);
+	{
+		strncpy(path, &data[xpos], pos);
+		path[pos] = '\0';
+	}
 	
 	pch = (char*)strstr(data, "\n");
 	xpos = pch-data;
@@ -103,9 +112,8 @@ void CHTTPServer::OnRead(mdk_client client, const char *data, ssize_t size)
 
 			headers[headers_size - 1] = (char*)malloc(sizeof(char) * 1023);
 			
-			strncpy_s(headers[headers_size-1], 1023, xdata, xpos);
+			strncpy(headers[headers_size-1], xdata, xpos);
 			
-			//printf("[XDEBUG] HEADER %d => %s\n", headers_size - 1, headers[headers_size - 1]);
 			xpos += 2;
 			xdata = &xdata[xpos];
 		}
@@ -135,18 +143,18 @@ void CHTTPServer::OnRead(mdk_client client, const char *data, ssize_t size)
 	Close(client);
 }
 
-void CHTTPServer::HandleHTTPRequest(mdk_client, const char *, const char *,const char*, const char **, size_t) {}
+void CHTTPServer::HandleHTTPRequest(mdk_socket, const char *, const char *,const char*, const char **, size_t) {}
 
-void CHTTPServer::WriteHTTPResponse(mdk_client client, const char*content, const char *content_type, int code, const char *message, const char** headers, size_t headers_size)
+void CHTTPServer::WriteHTTPResponse(mdk_socket client, const char*content, const char *content_type, int code, const char *message, const char** headers, size_t headers_size)
 {
 	std::string string = "HTTP/1.1 ";
 	char buffer[1024];
 	size_t i = 0;
-	struct tm tm;
+	struct tm* tm;
 	time_t t = time(NULL);
 	buffer[0] = '\0';
 	
-	localtime_s(&tm, &t);
+	tm = localtime(&t);
 	
 	// Status code
 	snprintf(buffer, sizeof(buffer)-1, "%d", code);
@@ -157,8 +165,8 @@ void CHTTPServer::WriteHTTPResponse(mdk_client client, const char*content, const
 	string += "\r\n";
 	
 	// Default headers
-	snprintf(buffer, sizeof(buffer)-1, "%s, %d %s %d %d:%d:%d GMT", _GetDay(tm.tm_wday),
-		tm.tm_mday, _GetMon(tm.tm_mon+1), tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	snprintf(buffer, sizeof(buffer)-1, "%s, %d %s %d %d:%d:%d GMT", _GetDay(tm->tm_wday),
+		tm->tm_mday, _GetMon(tm->tm_mon+1), tm->tm_year + 1900, tm->tm_hour, tm->tm_min, tm->tm_sec);
 
 	string += "Date: ";
 	string += buffer;
@@ -186,7 +194,7 @@ void CHTTPServer::WriteHTTPResponse(mdk_client client, const char*content, const
 	string += "\r\n";
 		
 	// Write to the client
-	Write(client, string);
+	WriteTCP(client, string);
 }
 
 const char* _GetMon(int i)

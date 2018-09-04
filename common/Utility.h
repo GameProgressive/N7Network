@@ -14,35 +14,10 @@
     You should have received a copy of the GNU Affero General Public License
     along with N7Network.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef _GSCONTAINER_H_
-#define _GSCONTAINER_H_
+#ifndef _N7_UTILITY_H_
+#define _N7_UTILITY_H_
 
-#include <MDK/MasterServerMDK.h>
-
-#include "GSClient.h"
-
-#include <map>
-
-class GSContainer
-{
-public:
-	static bool ConnectToGPCM();
-	static void DisconnectFromGPCM();
-	static bool IsConnectedToGPCM();
-	
-	static void SendToGPCM(const char* data);
-	static void SendToGPCM(std::string string);
-	static void SendToGPCM(void* data, int len);
-	
-	static GSClient* Get(int id);
-	static GSClient* New(int id);
-	static void Del(int id);
-	static void DelAll(void);
-	
-protected:
-	static Client* m_client;
-	static std::map<int, GSClient*> m_map;
-	
-};
+size_t get_n7_action(const char *buffer, char* out, size_t out_len);
+bool get_n7_data(const char *buffer, const char *name, char* out, size_t out_len);
 
 #endif
