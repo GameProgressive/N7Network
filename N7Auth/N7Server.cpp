@@ -22,11 +22,15 @@
 #include <Utility.h>
 
 #include <MDK/Utility.h>
+#include <MDK/ModuleEntryPoint.h>
 
 #define CHECK_ACTION(x) strcmp(action, x) == 0
 
-N7AuthServer::N7AuthServer() {}
-N7AuthServer::~N7AuthServer() {}
+N7AuthServer::N7AuthServer(int defaultport, bool udp) : CHTTPServer(defaultport, udp)
+{}
+
+N7AuthServer::~N7AuthServer()
+{}
 
 void N7AuthServer::HandleHTTPRequest(mdk_socket client, const char *http_action, const char *path, const char* content, const char **headers, size_t headers_len)
 {
@@ -72,3 +76,14 @@ void N7AuthServer::HandleAcctCreate(mdk_socket client, const char* content)
 	
 	
 }
+
+int N7AuthServer::Initialize()
+{
+	if (!m_lpDatabase)
+		return ERROR_DATABASE_ERROR;
+	
+	return ERROR_NONE;
+}
+
+
+ModuleEntryPoint(N7AuthServer, 3000, false);

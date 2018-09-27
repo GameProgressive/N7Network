@@ -1,7 +1,6 @@
 set(SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/N7Server.cpp
 	${CMAKE_CURRENT_LIST_DIR}/N7Server.h
-	${CMAKE_CURRENT_LIST_DIR}/ModuleMain.cpp
 )
 
 include_directories("${CMAKE_CURRENT_LIST_DIR}/../common")

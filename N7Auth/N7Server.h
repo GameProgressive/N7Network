@@ -22,8 +22,10 @@
 class N7AuthServer : public CHTTPServer
 {
 public:
-	N7AuthServer();
+	N7AuthServer(int defaultport, bool udp);
 	~N7AuthServer();
+	
+	int Initialize();
 	
 protected:
 	void HandleHTTPRequest(mdk_socket client, const char *action, const char *path, const char* content, const char **headers, size_t headers_len);

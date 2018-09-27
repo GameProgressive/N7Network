@@ -24,11 +24,13 @@
 const char* _GetMon(int i);
 const char* _GetDay(int i);
 
-CHTTPServer::CHTTPServer()
+CHTTPServer::CHTTPServer(int defaultport, bool udp) : CThreadServer(defaultport, udp)
 {}
 
 CHTTPServer::~CHTTPServer()
 {}
+
+int CHTTPServer::Initialize() { return 0; }
 
 bool CHTTPServer::OnTCPNewConnection(mdk_socket, int) { return true; }
 
@@ -184,7 +186,11 @@ void CHTTPServer::WriteHTTPResponse(mdk_socket client, const char*content, const
 	}
 	
 	string += "Content-Length: ";
+#ifdef __64BIT__
+	snprintf(buffer, sizeof(buffer)-1, "%ld", strlen(content));
+#else
 	snprintf(buffer, sizeof(buffer)-1, "%d", strlen(content));
+#endif
 	string += buffer;
 	string += "\r\n";
 	

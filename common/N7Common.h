@@ -17,30 +17,6 @@
 #ifndef _N7COMMON_H_
 #define _N7COMMON_H_
 
-#include <MDK/ModuleEntryPoint.h>
-
-#include <string>
-
-#if _WIN32 && _MSC_VER
-#include <Windows.h>
-#ifdef __cplusplus
-#define N7ModuleStart extern "C" { __declspec(dllexport) int MDKModule(void* data) {
-#else
-#define N7ModuleStart __declspec(dllexport) int MDKModule(void* data) {
-#endif
-#else
-#ifdef __cplusplus
-#define N7ModuleStart extern "C" { int MDKModule(void* data) {
-#else
-#define N7ModuleStart int MDKModule(void* data) {
-#endif
-#endif
-#ifdef __cplusplus
-#define N7ModuleEnd Server->Run(); return ERROR_NONE; }}
-#else
-#define N7ModuleEnd return ERROR_NONE; }
-#endif
-
 #define GS_REQUEST_LEN				20
 #define GS_GAMENAME_LEN				64
 #define GP_EMAIL_LEN				51

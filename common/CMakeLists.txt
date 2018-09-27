@@ -11,3 +11,6 @@ set(SOURCES
 add_library(N7Common STATIC ${SOURCES})
 target_link_libraries(N7Common MDK)
 
+if (RS_64BIT EQUAL 1)
+	target_compile_definitions(N7Common PRIVATE __64BIT__)
+endif()

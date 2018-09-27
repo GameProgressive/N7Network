@@ -19,13 +19,15 @@
 
 #include "N7Common.h"
 
-#include <MDK/TemplateServer.h>
+#include <MDK/ThreadServer.h>
 
-class CHTTPServer : public CTemplateServer
+class CHTTPServer : public CThreadServer
 {
 public:
-	CHTTPServer();
+	CHTTPServer(int defaultport, bool udp);
 	~CHTTPServer();
+	
+	virtual int Initialize();
 	
 	bool OnTCPNewConnection(mdk_socket client, int status);
 	void OnTCPRead(mdk_socket client, const char *data, ssize_t size);
